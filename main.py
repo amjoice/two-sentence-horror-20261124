@@ -1,29 +1,43 @@
 #!/usr/bin/env python3
-"""Two-Sentence Horror — make.fun entry (program/v1).
+"""Two-sentence horror entry for make.fun.
 
-Writes one horror story of exactly two sentences to /output/entry.txt.
-Standard library only: the grading sandbox is plain python:3.13-slim.
+Produces exactly one two-sentence horror story and writes it to
+/output/entry.txt. Standard library only: the grading sandbox is plain
+python:3.13-slim, so no third-party packages are available or used.
 """
 
 import os
+from pathlib import Path
 
-STORY = (
+SENTENCE_ONE = (
     "My grandmother left me her house on one condition: "
-    "never open the cellar door. "
+    "never open the cellar door."
+)
+SENTENCE_TWO = (
     "I opened it this morning and found a second will inside, "
     "in my own handwriting, dated tomorrow."
 )
 
+ENTRY_PATH = Path("/output/entry.txt")
 
-def main() -> None:
-    os.makedirs("/output", exist_ok=True)
-    # umask 022 so the file is world-readable (the grader collects
-    # outputs as another user); chmod explicitly as well.
+
+def assemble_story() -> str:
+    """Glue the two sentences together with a single space."""
+    return " ".join([SENTENCE_ONE, SENTENCE_TWO])
+
+
+def save_entry() -> None:
+    """Write the story to /output/entry.txt, world-readable.
+
+    The grader collects outputs as another user, so the file must be
+    readable by everyone: set a permissive umask before creating it
+    and chmod it explicitly afterwards.
+    """
+    ENTRY_PATH.parent.mkdir(parents=True, exist_ok=True)
     os.umask(0o022)
-    with open("/output/entry.txt", "w", encoding="utf-8") as f:
-        f.write(STORY)
-    os.chmod("/output/entry.txt", 0o644)
+    ENTRY_PATH.write_text(assemble_story(), encoding="utf-8")
+    os.chmod(ENTRY_PATH, 0o644)
 
 
 if __name__ == "__main__":
-    main()
+    save_entry()
